@@ -1,6 +1,7 @@
 pub mod problem;
 use crate::problem::*;
 fn main(){
-    //println!("{}",day1_part2());
-    day2_part2();
+    //println!("{}",day2_part1());
+    //day3_part1();
+
 }

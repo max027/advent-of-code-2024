@@ -5,11 +5,13 @@ pub fn day1_part1()->i32{
     let mut list1:Vec<i32>=vec![]; 
     let mut list2:Vec<i32>=vec![]; 
     let mut  ans=0;
-    for line in content.lines(){
+
+    content.lines().for_each(|line|{
         let num:Vec<&str>=line.split_whitespace().collect();
         list1.push(num[0].parse().unwrap());
         list2.push(num[1].parse().unwrap());
-    }
+    });
+
     list1.sort_by(|a,b| a.partial_cmp(b).unwrap());
     list2.sort_by(|a,b| a.partial_cmp(b).unwrap());
     for i in 0..list1.len(){
@@ -24,12 +26,13 @@ pub fn day1_part2()->i32{
     let mut list2:Vec<i32>=vec![]; 
     let mut map:HashMap<i32,i32>=HashMap::new();
     let mut  ans=0;
-    for line in content.lines(){
+
+    content.lines().for_each(|line| {
         let num:Vec<&str>=line.split_whitespace().collect();
         list1.push(num[0].parse().unwrap());
         list2.push(num[1].parse().unwrap());
-    }
-   
+    });   
+
     for i in list2{
         *map.entry(i).or_insert(0)+=1;
     }
@@ -46,7 +49,9 @@ pub fn day1_part2()->i32{
 }
 
 pub fn day2_part1()->i32{
-    fn check_safty(line:Vec<i32>)->bool{
+
+/*   not needed  
+ *    fn check_safty(line:Vec<i32>)->bool{
         let mut is_dec=true;
         let mut is_inc=true;
         for i in 1..line.len(){
@@ -70,23 +75,57 @@ pub fn day2_part1()->i32{
         }
         true 
     }
+*/
     let content=fs::read_to_string("../input2.txt").expect("file not found");
     let mut ans=0;
-    for i in content.lines(){
-        let num:Vec<&str>=i.split_whitespace().collect(); 
-        let int_vec:Vec<i32>=num.iter().map(|s| s.parse().unwrap()).collect();
-        if check_safty(int_vec) {
+    content.lines().for_each(|i|{
+        let int_vec:Vec<i32>=i.split_whitespace().filter_map(|n| n.parse().ok()).collect();
+        let is_inc=int_vec.windows(2).all(|line| (line[0]<=line[1])&& ((line[1]-line[0]).abs()>=1 && (line[1]-line[0]).abs()<=3)); 
+
+        let is_dec=int_vec.windows(2).all(|line| (line[0]>=line[1])&& ((line[1]-line[0]).abs()>=1 && (line[1]-line[0]).abs()<=3)); 
+
+        if is_inc||is_dec {
             ans+=1;
         }
-    }
+    });
 
     ans
 }
 
 pub fn day2_part2(){
-    let content=fs::read_to_string("../input2.txt").expect("file not found");
-    
+    fn is_safe(line:&Vec<i32>)->bool{
 
+        let is_inc=line.windows(2).all(|line| (line[0]<=line[1])&& ((line[1]-line[0]).abs()>=1 && (line[1]-line[0]).abs()<=3)); 
+
+        let is_dec=line.windows(2).all(|line| (line[0]>=line[1])&& ((line[1]-line[0]).abs()>=1 && (line[1]-line[0]).abs()<=3)); 
+        is_inc||is_dec
+    }
+
+    fn problem_dampner(line:&Vec<i32>,ans:&mut i32){
+        let mut line_vec=line.to_vec();
+        for (i,_) in line.iter().enumerate(){
+            let removed=line_vec.remove(i);
+            if is_safe(&line_vec){
+                *ans+=1; 
+                line_vec.insert(i, removed);
+                return;
+            }
+            line_vec.insert(i, removed);
+        }
+    }
+    let content=fs::read_to_string("../input.txt").expect("file not found");
+    let mut ans=0;
+    for i in content.lines(){
+       let int_vec:Vec<i32>=i.split_whitespace().filter_map(|n| n.parse().ok()).collect(); 
+        if is_safe(&int_vec){
+            ans+=1;
+            continue;
+        }
+
+      problem_dampner(&int_vec, &mut ans); 
+    }
+
+    println!("{}",ans);
 }
 
 
