@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::fs;
+use regex::Regex;
 pub fn day1_part1()->i32{
     let content=fs::read_to_string("../input1.txt").expect("file not found");
     let mut list1:Vec<i32>=vec![]; 
@@ -50,32 +51,32 @@ pub fn day1_part2()->i32{
 
 pub fn day2_part1()->i32{
 
-/*   not needed  
- *    fn check_safty(line:Vec<i32>)->bool{
-        let mut is_dec=true;
-        let mut is_inc=true;
-        for i in 1..line.len(){
-            match line[i].cmp(&line[i-1]) {
-                std::cmp::Ordering::Less=>is_dec=false,
-                std::cmp::Ordering::Greater=>is_inc=false,
-                _=>return false
-            }
-            
-            if !is_inc && !is_dec{
-                return false;
-            }
-        }
-        
-        for i in 1..line.len(){
-            if (line[i-1]-line[i]).abs()<=3 && (line[i-1]-line[i]).abs()>=1{
-                continue;
-            }else{
-                return false;
-            }
-        }
-        true 
-    }
-*/
+    /*   not needed  
+     *    fn check_safty(line:Vec<i32>)->bool{
+     let mut is_dec=true;
+     let mut is_inc=true;
+     for i in 1..line.len(){
+     match line[i].cmp(&line[i-1]) {
+     std::cmp::Ordering::Less=>is_dec=false,
+     std::cmp::Ordering::Greater=>is_inc=false,
+     _=>return false
+     }
+
+     if !is_inc && !is_dec{
+     return false;
+     }
+     }
+
+     for i in 1..line.len(){
+     if (line[i-1]-line[i]).abs()<=3 && (line[i-1]-line[i]).abs()>=1{
+     continue;
+     }else{
+     return false;
+     }
+     }
+     true 
+     }
+     */
     let content=fs::read_to_string("../input2.txt").expect("file not found");
     let mut ans=0;
     content.lines().for_each(|i|{
@@ -116,17 +117,74 @@ pub fn day2_part2(){
     let content=fs::read_to_string("../input.txt").expect("file not found");
     let mut ans=0;
     for i in content.lines(){
-       let int_vec:Vec<i32>=i.split_whitespace().filter_map(|n| n.parse().ok()).collect(); 
+        let int_vec:Vec<i32>=i.split_whitespace().filter_map(|n| n.parse().ok()).collect(); 
         if is_safe(&int_vec){
             ans+=1;
             continue;
         }
 
-      problem_dampner(&int_vec, &mut ans); 
+        problem_dampner(&int_vec, &mut ans); 
     }
 
     println!("{}",ans);
 }
 
+
+
+pub fn day3_part1(){
+    let content=fs::read_to_string("../input3.txt").expect("file not found");
+    let re=Regex::new(
+        r"(?x)
+        mul
+        \(
+        (?<op1>[0-9]{1,3})
+        ,
+        (?<op2>[0-9]{1,3})
+        \)
+        ").unwrap(); 
+        let mut ans:u32=0;  
+    for i in content.lines(){
+        for cap in re.captures_iter(i){
+            let op1: u32 = cap["op1"].parse().unwrap();
+            let op2: u32 = cap["op2"].parse().unwrap();
+            ans += op1 * op2;
+        }
+    }
+    println!("{}",ans);
+}
+
+pub fn day3_part2(){
+
+    let content=fs::read_to_string("../input3.txt").expect("file not found");
+    let re=Regex::new(r"(?x)
+        (?<do>do\(\))
+        |(?<dont>don't\(\))
+        |mul
+        \(
+        (?<op1>[0-9]{1,3})
+        ,
+        (?<op2>[0-9]{1,3})
+        \)").unwrap(); 
+        let mut enable=true;
+    let mut ans=0;
+    for i in content.lines(){
+        for cap in re.captures_iter(i){
+            if let Some(val)=cap.name("do"){
+                enable=true;
+
+            }else if let Some(val)=cap.name("dont"){
+                enable=false;
+            }else if let (Some(val1),Some(val2))=(cap.name("op1"),cap.name("op2")){
+                if enable {
+                    let op1: u32 = cap["op1"].parse().unwrap();
+                    let op2: u32 = cap["op2"].parse().unwrap();
+                    ans += op1 * op2;
+                }
+            }
+        }
+    }
+
+    println!("{}",ans);
+}
 
 
